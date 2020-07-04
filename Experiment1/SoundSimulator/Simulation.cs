@@ -16,7 +16,7 @@ namespace SoundSimulator
             int count = (int)Math.Floor((endTime - startTime) / samplingStep);
             for (int i = 0; i < count; i++)
             {
-                double currentTime = 0;
+                double currentTime = i * samplingStep;
                 IEnumerable<double> test = MicrophoneConfiguration.PhaseCorrectionsForPoint(listeningTarget)
                     .SelectMany(pc =>
                         SourceCollection.SoundSources
