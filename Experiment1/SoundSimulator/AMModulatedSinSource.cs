@@ -7,11 +7,16 @@ namespace SoundSimulator
     {
         public Vector3 position { get; }
 
-        public Func<double, double> EvaluateSouceAtTime => throw new NotImplementedException();
+        public Vector3 Position => throw new NotImplementedException();
 
         public AMModulatedSinSource(Vector3 pos)
         {
 
+        }
+
+        public double EvaluateSouceAtTime(double time)
+        {
+            throw new NotImplementedException();
         }
     }
 

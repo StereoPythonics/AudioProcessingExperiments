@@ -2,7 +2,7 @@
 
 namespace SoundSimulator
 {
-    public class Microphone
+    public class Microphone : IMicrophone
     { 
         public Vector3 Position { get; set; }
     }
