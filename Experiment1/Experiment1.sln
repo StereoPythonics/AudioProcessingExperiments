@@ -5,6 +5,10 @@ VisualStudioVersion = 16.0.29215.179
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Experiment1", "Experiment1\Experiment1.csproj", "{C4C277B8-E8EB-4519-9F2B-46F28DC7010D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundSimulator", "SoundSimulator\SoundSimulator.csproj", "{CED40DF3-C915-438C-A670-913D1786F19E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Ignore these", "Ignore these", "{88C0E688-02BD-4674-91EA-4612BAF6ABFF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,9 +19,16 @@ Global
 		{C4C277B8-E8EB-4519-9F2B-46F28DC7010D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C4C277B8-E8EB-4519-9F2B-46F28DC7010D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C4C277B8-E8EB-4519-9F2B-46F28DC7010D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CED40DF3-C915-438C-A670-913D1786F19E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CED40DF3-C915-438C-A670-913D1786F19E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CED40DF3-C915-438C-A670-913D1786F19E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CED40DF3-C915-438C-A670-913D1786F19E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C4C277B8-E8EB-4519-9F2B-46F28DC7010D} = {88C0E688-02BD-4674-91EA-4612BAF6ABFF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B1C8FEDF-E58E-4823-A8C2-3C4157C287EA}
