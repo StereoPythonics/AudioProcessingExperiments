@@ -18,9 +18,9 @@ namespace SoundSimulator
             {
                 double currentTime = i * samplingStep;
                 IEnumerable<double> test = MicrophoneConfiguration.PhaseCorrectionsForPoint(listeningTarget)
-                    .SelectMany(pc =>
+                    .Select(pc =>
                         SourceCollection.SoundSources
-                        .Select(ss => ss.EvaluateSouceAtTime(currentTime - pc.DelayCorrection))
+                        .Select(ss => ss.EvaluateSouceAtTime(currentTime - ((pc.Microphone.Position - ss.Position).Length() / Constants.SOS) + pc.DelayCorrection)).Sum()
                     );
                 returnable.Add(test.Average());
             }
@@ -28,12 +28,8 @@ namespace SoundSimulator
         }
         public Simulation(SourceCollection sourceCollection, MicrophoneConfiguration microphoneConfiguration)
         {
-
             SourceCollection = sourceCollection;
-            
-            
-            
-            MicrophoneConfiguration = microphoneConfiguration; 
+            MicrophoneConfiguration = microphoneConfiguration;
         }
     }
 

@@ -10,7 +10,7 @@ namespace SoundSimulator
         private double startingPhase;
         public double EvaluateSouceAtTime(double evaluationTime)
         {
-            return Math.Sin(this.frequency * evaluationTime + this.startingPhase);
+            return Math.Sin((2*Math.PI*this.frequency * evaluationTime) + this.startingPhase);
         }
 
         public SteadySinSource(Vector3 pos, double frequency, double startingPhase = 0)
