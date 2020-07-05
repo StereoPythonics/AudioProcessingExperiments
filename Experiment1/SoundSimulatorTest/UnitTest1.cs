@@ -1,10 +1,12 @@
 using NAudio.Wave;
+using Newtonsoft.Json;
 using SoundSimulator;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace SoundSimulatorTest
@@ -40,6 +42,21 @@ namespace SoundSimulatorTest
             byte[] buffer = result.SelectMany(r => BitConverter.GetBytes(Convert.ToInt16(Math.Max(Math.Min(1, r), -1) * 0.5 * 32768))).ToArray();
 
             using (WaveFileWriter writer = new WaveFileWriter(@$"DataOutput\{DateTime.Now.ToFileTimeUtc()}{identifier}.wav", new WaveFormat(rate, bitDepth, 1)))
+            {
+                //int bytesRead;
+                //while ((bytesRead = wavReader.Read(buffer, 0, buffer.Length)) > 0)
+                //{
+                writer.Write(buffer, 0, buffer.Length/*bytesRead*/);
+                //}
+            }
+        }
+
+        public static void WriteStereoWav(IEnumerable<double> result1, IEnumerable<double> result2, int rate = 44000, int bitDepth = 16, string identifier = "")
+        {
+            var result = result1.Zip(result2).SelectMany(t => new List<double> { t.First, t.Second }).ToList().ScaleSoundSource();
+            byte[] buffer = result.SelectMany(r => BitConverter.GetBytes(Convert.ToInt16(Math.Max(Math.Min(1, r), -1) * 0.5 * 32768))).ToArray();
+
+            using (WaveFileWriter writer = new WaveFileWriter(@$"DataOutput\{DateTime.Now.ToFileTimeUtc()}{identifier}.wav", new WaveFormat(rate, bitDepth, 2)))
             {
                 //int bytesRead;
                 //while ((bytesRead = wavReader.Read(buffer, 0, buffer.Length)) > 0)
@@ -120,6 +137,7 @@ namespace SoundSimulatorTest
         public void TestImprovementScaling()
         {
             var results = Enumerable.Range(0, 8).Select(i => new { twoToTheWhat = i, power = GetSignalToNoise((int)Math.Pow(2, i)) }).ToList();
+            string jsonResults = Utf8Json.JsonSerializer.ToJsonString(results);
             Assert.True(results.OrderBy(r => r.twoToTheWhat).SequenceEqual(results.OrderBy(r => r.power)));
         }
 
@@ -178,7 +196,7 @@ namespace SoundSimulatorTest
             float magnitude = 10;
             MicrophoneConfiguration microphoneConfiguration = new MicrophoneConfiguration()
             {
-                Microphones = new List<IMicrophone>(Enumerable.Range(0, 60)
+                Microphones = new List<IMicrophone>(Enumerable.Range(0, 64)
                 .Select(i =>
                 new Microphone()
                 {
@@ -196,19 +214,24 @@ namespace SoundSimulatorTest
             {
                 SoundSources = new List<ISoundSource>()
                 {
-                    new SteadySinSource(new Vector3(0,1,1),1000),
-                    new SteadySinSource(new Vector3(0,1,1),750),
+                    //new SteadySinSource(new Vector3(0,1,1),1000),
+                    //new SteadySinSource(new Vector3(0,1,1),750),
                     new SteadySinSource(new Vector3(1,1,0),500),
-                    new WavSource(new Vector3(1,1,1), $"source1.wav")
+                    new WhiteNoiseSource(new Vector3(0,2,-1)),
+                    new WavSource(new Vector3(0,1,1), $"source1.wav"),
+                    new WavSource(new Vector3(2,1,1), $"source1.wav"),
+                    new WavSource(new Vector3(1,1,3), $"source1.wav")
                 }
             };
             //var test = Constants.SOS;
             Simulation sim = new Simulation(sourceCollection, microphoneConfiguration);
-            var result = sim.GetIntensityResult(0, 5, 1.0 / 44000, new Vector3(1, 1, 1)).ScaleSoundSource();
+            var result1 = Task.Run(() => sim.GetIntensityResult(0, 3, 1.0 / 44000, new Vector3(0, 1, 1.0f)));
+            var result2 = Task.Run(() => sim.GetIntensityResult(0, 3, 1.0 / 44000, new Vector3(0, 1, 0.9f)));
+            Task.WaitAll(new Task[] { result1, result2 });
             //Assert.True(result.All(i => i < 0.0001));
             string identifier = "WavTest_45mic_1source";
-            ShowData(result, identifier: identifier);
-            WriteWav(result, identifier: identifier);
+            ShowData(result1.Result, identifier: identifier);
+            WriteStereoWav(result1.Result,result2.Result, identifier: identifier);
 
         }
 
