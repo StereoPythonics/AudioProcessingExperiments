@@ -15,7 +15,7 @@ namespace SoundSimulatorTest
             var subsample = result.Take(1000);
             var plt = new ScottPlot.Plot(800, 800);
             plt.PlotScatter(Enumerable.Range(0, subsample.Count()).Select(i => (double)i).ToArray(), subsample.ToArray());
-            plt.SaveFig(@$"C:\Users\nigel\Pictures\{DateTime.Now.ToFileTimeUtc()}{identifier}.PNG");
+            plt.SaveFig(@$"DataOutput\{DateTime.Now.ToFileTimeUtc()}{identifier}.PNG");
         }
 
         public static void ShowFFTData(IEnumerable<double> result, int samplerate)
@@ -32,13 +32,13 @@ namespace SoundSimulatorTest
             double[] freqs = FftSharp.Transform.FFTfreq(samplerate, fftPower.Length);
             var plt = new ScottPlot.Plot(800, 800);
             plt.PlotScatter(freqs, fftPower);
-            plt.SaveFig(@$"C:\Users\nigel\Pictures\{DateTime.Now.ToFileTimeUtc()}fft.PNG");
+            plt.SaveFig(@$"DataOutput\{DateTime.Now.ToFileTimeUtc()}fft.PNG");
         }
         public static void WriteWav(IEnumerable<double> result, int rate = 44000, int bitDepth = 16, string identifier="")
         {
             byte[] buffer = result.SelectMany(r => BitConverter.GetBytes(Convert.ToInt16(Math.Max(Math.Min(1, r), -1) * 0.5 * 32768))).ToArray();
 
-            using (WaveFileWriter writer = new WaveFileWriter(@$"C:\Users\Rob\Pictures\{DateTime.Now.ToFileTimeUtc()}{identifier}.wav", new WaveFormat(rate, bitDepth, 1)))
+            using (WaveFileWriter writer = new WaveFileWriter(@$"DataOutput\{DateTime.Now.ToFileTimeUtc()}{identifier}.wav", new WaveFormat(rate, bitDepth, 1)))
             {
                 //int bytesRead;
                 //while ((bytesRead = wavReader.Read(buffer, 0, buffer.Length)) > 0)
@@ -73,7 +73,7 @@ namespace SoundSimulatorTest
             Assert.True(result.All(i => i < 0.0001));
         }
 
-        [Fact]
+        [Fact] 
         public void TestSoundSelection()
         {
             Random randoCalrissian = new Random(123456789);
