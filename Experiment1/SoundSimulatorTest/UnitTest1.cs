@@ -231,8 +231,8 @@ namespace SoundSimulatorTest
             Task.WaitAll(new Task[] { result1, result2 });
             //Assert.True(result.All(i => i < 0.0001));
             string identifier = $"WavTest_{nMics}mic_1source";
-            ShowData(result1.result, identifier: identifier);
-            WriteWav(result, identifier: identifier);
+            ShowData(result1.Result, identifier: identifier);
+            WriteWav(result1.Result, identifier: identifier);
             WriteStereoWav(result1.Result,result2.Result, identifier: identifier);
 
         }
