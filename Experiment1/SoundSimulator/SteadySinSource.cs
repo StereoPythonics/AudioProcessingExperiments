@@ -1,10 +1,21 @@
 ﻿using NAudio.Wave;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Numerics;
 
 namespace SoundSimulator
 {
+    public static class SoundSourceUtils
+    {
+        public static double[] ScaleSoundSource(this IEnumerable<double> source)
+        {
+            double scaler = 0.999 / source.Max(r => Math.Abs(r));
+            double[] scaledResult = source.Select(r => r * scaler).ToArray();
+            return scaledResult;
+        }
+    }
     public class SteadySinSource : ISoundSource
     {
         public Vector3 Position { get; set; }

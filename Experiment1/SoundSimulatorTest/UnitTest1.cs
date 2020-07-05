@@ -21,7 +21,7 @@ namespace SoundSimulatorTest
 
         public static void ShowFFTData(IEnumerable<double> result, int samplerate)
         {
-            double[] resultArray = result.Take(512*2).ToArray();
+            double[] resultArray = result.Take(512*4).ToArray();
             // Window your signal
             double[] window = FftSharp.Window.Hanning(resultArray.Length);
             
@@ -81,7 +81,7 @@ namespace SoundSimulatorTest
             float magnitude = 10;
             MicrophoneConfiguration microphoneConfiguration = new MicrophoneConfiguration()
             {
-                Microphones = new List<IMicrophone>(Enumerable.Range(0, 60)
+                Microphones = new List<IMicrophone>(Enumerable.Range(0, 16)
                 .Select(i =>
                 new Microphone()
                 {
@@ -123,12 +123,7 @@ namespace SoundSimulatorTest
 
         }
 
-        public static double[] ScaleSoundSource(IEnumerable<double> source)
-        {
-            double scaler = 0.999 / source.Max(r => Math.Abs(r));
-            double[] scaledResult = source.Select(r => r * scaler).ToArray();
-            return scaledResult;
-        }
+        
         [Fact]
         public void TestWavSource()
         {
@@ -137,7 +132,7 @@ namespace SoundSimulatorTest
             float magnitude = 10;
             MicrophoneConfiguration microphoneConfiguration = new MicrophoneConfiguration()
             {
-                Microphones = new List<IMicrophone>(Enumerable.Range(0, 1)
+                Microphones = new List<IMicrophone>(Enumerable.Range(0, 60)
                 .Select(i =>
                 new Microphone()
                 {
