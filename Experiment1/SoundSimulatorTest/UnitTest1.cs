@@ -12,9 +12,27 @@ namespace SoundSimulatorTest
     {
         public static void ShowData(IEnumerable<double> result)
         {
+            var subsample = result.Take(1000);
             var plt = new ScottPlot.Plot(800, 800);
-            plt.PlotScatter(Enumerable.Range(0, result.Count()).Select(i => (double)i).ToArray(), result.ToArray());
+            plt.PlotScatter(Enumerable.Range(0, subsample.Count()).Select(i => (double)i).ToArray(), subsample.ToArray());
             plt.SaveFig(@$"C:\Users\nigel\Pictures\{DateTime.Now.ToFileTimeUtc()}.PNG");
+        }
+
+        public static void ShowFFTData(IEnumerable<double> result, int samplerate)
+        {
+            double[] resultArray = result.Take(512*2).ToArray();
+            // Window your signal
+            double[] window = FftSharp.Window.Hanning(resultArray.Length);
+            
+            FftSharp.Window.ApplyInPlace(window, resultArray);
+            // For audio we typically want the FFT amplitude (in dB)
+            double[] fftPower = FftSharp.Transform.FFTpower(resultArray);
+
+            // Create an array of frequencies for each point of the FFT
+            double[] freqs = FftSharp.Transform.FFTfreq(samplerate, fftPower.Length);
+            var plt = new ScottPlot.Plot(800, 800);
+            plt.PlotScatter(freqs, fftPower);
+            plt.SaveFig(@$"C:\Users\nigel\Pictures\{DateTime.Now.ToFileTimeUtc()}fft.PNG");
         }
         [Fact]
         public void TestPhaseCancel()
@@ -49,7 +67,7 @@ namespace SoundSimulatorTest
             float magnitude = 10;
             MicrophoneConfiguration microphoneConfiguration = new MicrophoneConfiguration()
             {
-                Microphones = new List<IMicrophone>(Enumerable.Range(0, 16)
+                Microphones = new List<IMicrophone>(Enumerable.Range(0, 1)
                 .Select(i =>
                 new Microphone()
                 {
@@ -67,22 +85,30 @@ namespace SoundSimulatorTest
             {
                 SoundSources = new List<ISoundSource>()
                 {
-                    new SteadySinSource(new Vector3(1,0,0),250),
-                    new SteadySinSource(new Vector3(0,1,0),1500),
-                    new SteadySinSource(new Vector3(0,1,1),750),
-                    new SteadySinSource(new Vector3(1,1,0),500),
-                    new SteadySinSource(new Vector3(1,1,1),1000),
+                    //new SteadySinSource(new Vector3(1,0,-3),190),
+                    new WhiteNoiseSource(new Vector3(0,2,1)),
+                    new WhiteNoiseSource(new Vector3(0,-2,1)),
+                    //new SteadySinSource(new Vector3(0,1,15),720),
+                    new SteadySinSource(new Vector3(1,1,0),1000),
+                    //new SteadySinSource(new Vector3(2,1,1),1100),
                 }
             };
             var test = Constants.SOS;
+            int SampleRate = 44000;
             Simulation sim = new Simulation(sourceCollection, microphoneConfiguration);
-            var result = sim.GetIntensityResult(0, 5, 1.0/44000,new Vector3(1,1,1));
+            var result = sim.GetIntensityResult(0, 1, 1.0/SampleRate,new Vector3(1,1,0));
+            double scaler = 0.999 / result.Max(r => Math.Abs(r));
+            double[] scaledResult = result.Select(r => r * scaler).ToArray();
+
+
+
             //Assert.True(result.All(i => i < 0.0001));
-            ShowData(result);
+            ShowFFTData(scaledResult, SampleRate);
+            ShowData(scaledResult);
+            
+            byte[] buffer = scaledResult.SelectMany(r => BitConverter.GetBytes(Convert.ToInt16(r*32768))).ToArray();
 
-            byte[] buffer = result.SelectMany(r => BitConverter.GetBytes(Convert.ToInt16(Math.Max(Math.Min(1,r),-1)*0.5*32768))).ToArray();
-
-            using (WaveFileWriter writer = new WaveFileWriter(@$"C:\Users\nigel\Pictures\{DateTime.Now.ToFileTimeUtc()}.wav", new WaveFormat(44000, 16, 1)))
+            using (WaveFileWriter writer = new WaveFileWriter(@$"C:\Users\nigel\Pictures\{DateTime.Now.ToFileTimeUtc()}.wav", new WaveFormat(SampleRate, 16, 1)))
             {
                 //int bytesRead;
                 //while ((bytesRead = wavReader.Read(buffer, 0, buffer.Length)) > 0)
