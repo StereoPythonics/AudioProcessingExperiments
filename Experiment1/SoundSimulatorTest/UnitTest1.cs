@@ -70,7 +70,7 @@ namespace SoundSimulatorTest
             };
             var test = Constants.SOS;
             Simulation sim = new Simulation(sourceCollection, microphoneConfiguration);
-            var result = ScaleSoundSource(sim.GetIntensityResult(0, 0.1, 0.0001));
+            var result = sim.GetIntensityResult(0, 0.1, 0.0001).ScaleSoundSource();
             Assert.True(result.All(i => i < 0.0001));
         }
 
@@ -110,7 +110,7 @@ namespace SoundSimulatorTest
             var test = Constants.SOS;
             int SampleRate = 44000;
             Simulation sim = new Simulation(sourceCollection, microphoneConfiguration);
-            var scaledResult = ScaleSoundSource(sim.GetIntensityResult(0, 1, 1.0/SampleRate,new Vector3(1,1,0)));
+            var scaledResult = sim.GetIntensityResult(0, 1, 1.0/SampleRate,new Vector3(1,1,0)).ScaleSoundSource();
             
 
 
@@ -158,7 +158,7 @@ namespace SoundSimulatorTest
             };
             //var test = Constants.SOS;
             Simulation sim = new Simulation(sourceCollection, microphoneConfiguration);
-            var result = ScaleSoundSource(sim.GetIntensityResult(0, 5, 1.0 / 44000, new Vector3(1, 1, 1)));
+            var result = sim.GetIntensityResult(0, 5, 1.0 / 44000, new Vector3(1, 1, 1)).ScaleSoundSource();
             //Assert.True(result.All(i => i < 0.0001));
             string identifier = "WavTest_45mic_1source";
             ShowData(result, identifier: identifier);
