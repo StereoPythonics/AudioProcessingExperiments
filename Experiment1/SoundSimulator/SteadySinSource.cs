@@ -23,25 +23,25 @@ namespace SoundSimulator
             this.startingPhase = startingPhase;
         }
     }
-    public class WavSource : ISoundSource
-    {
-        public Vector3 Position { get; set; }
-        double[] Source;
-        public double EvaluateSouceAtTime(double time)
-        {
-            throw new NotImplementedException();
-        }
-        WaveFormat format;
-        public WavSource(Vector3 pos, string filepath)
-        {
-            using WaveFileReader reader = new WaveFileReader(filepath);
-            format = reader.WaveFormat;
-            using MemoryStream ms = new MemoryStream();
-            reader.CopyTo(ms);
-            Source = ms.ToArray().;
-            Position = pos;
-        }
-    }
+    //public class WavSource : ISoundSource
+    //{
+    //    public Vector3 Position { get; set; }
+    //    double[] Source;
+    //    public double EvaluateSouceAtTime(double time)
+    //    {
+    //        throw new NotImplementedException();
+    //    }
+    //    WaveFormat format;
+    //    public WavSource(Vector3 pos, string filepath)
+    //    {
+    //        using WaveFileReader reader = new WaveFileReader(filepath);
+    //        format = reader.WaveFormat;
+    //        using MemoryStream ms = new MemoryStream();
+    //        reader.CopyTo(ms);
+    //        Source = ms.ToArray().;
+    //        Position = pos;
+    //    }
+    //}
 
 
 }
