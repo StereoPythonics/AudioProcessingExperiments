@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using System.Reflection.Metadata;
 using NAudio.Wave;
@@ -41,6 +42,7 @@ namespace SoundSimulator
                     var intSampleValue = BitConverter.ToInt16(bytesBuffer, sampleIndex * 2);
                     wavSamples.Add(intSampleValue / 32768.0);
                 }
+                wavSamples = wavSamples.ScaleSoundSource().ToList();
             }
         }
     }

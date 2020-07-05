@@ -193,10 +193,11 @@ namespace SoundSimulatorTest
         {
             System.Diagnostics.Debug.WriteLine(Environment.CurrentDirectory);
             Random randoCalrissian = new Random(123456789);
-            float magnitude = 10;
+            float magnitude = 3;
+            int nMics = 45;
             MicrophoneConfiguration microphoneConfiguration = new MicrophoneConfiguration()
             {
-                Microphones = new List<IMicrophone>(Enumerable.Range(0, 64)
+                Microphones = new List<IMicrophone>(Enumerable.Range(0, nMics)
                 .Select(i =>
                 new Microphone()
                 {
@@ -229,8 +230,9 @@ namespace SoundSimulatorTest
             var result2 = Task.Run(() => sim.GetIntensityResult(0, 3, 1.0 / 44000, new Vector3(0, 1, 0.9f)));
             Task.WaitAll(new Task[] { result1, result2 });
             //Assert.True(result.All(i => i < 0.0001));
-            string identifier = "WavTest_45mic_1source";
-            ShowData(result1.Result, identifier: identifier);
+            string identifier = $"WavTest_{nMics}mic_1source";
+            ShowData(result1.result, identifier: identifier);
+            WriteWav(result, identifier: identifier);
             WriteStereoWav(result1.Result,result2.Result, identifier: identifier);
 
         }
