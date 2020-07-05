@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using Xunit;
 
 namespace SoundSimulatorTest
@@ -69,7 +70,7 @@ namespace SoundSimulatorTest
             };
             var test = Constants.SOS;
             Simulation sim = new Simulation(sourceCollection, microphoneConfiguration);
-            var result = sim.GetIntensityResult(0, 0.1, 0.0001);
+            var result = ScaleSoundSource(sim.GetIntensityResult(0, 0.1, 0.0001));
             Assert.True(result.All(i => i < 0.0001));
         }
 
@@ -109,9 +110,8 @@ namespace SoundSimulatorTest
             var test = Constants.SOS;
             int SampleRate = 44000;
             Simulation sim = new Simulation(sourceCollection, microphoneConfiguration);
-            var result = sim.GetIntensityResult(0, 1, 1.0/SampleRate,new Vector3(1,1,0));
-            double scaler = 0.999 / result.Max(r => Math.Abs(r));
-            double[] scaledResult = result.Select(r => r * scaler).ToArray();
+            var scaledResult = ScaleSoundSource(sim.GetIntensityResult(0, 1, 1.0/SampleRate,new Vector3(1,1,0)));
+            
 
 
 
@@ -123,6 +123,12 @@ namespace SoundSimulatorTest
 
         }
 
+        public static double[] ScaleSoundSource(IEnumerable<double> source)
+        {
+            double scaler = 0.999 / source.Max(r => Math.Abs(r));
+            double[] scaledResult = source.Select(r => r * scaler).ToArray();
+            return scaledResult;
+        }
         [Fact]
         public void TestWavSource()
         {
@@ -131,7 +137,7 @@ namespace SoundSimulatorTest
             float magnitude = 10;
             MicrophoneConfiguration microphoneConfiguration = new MicrophoneConfiguration()
             {
-                Microphones = new List<IMicrophone>(Enumerable.Range(0, 45)
+                Microphones = new List<IMicrophone>(Enumerable.Range(0, 1)
                 .Select(i =>
                 new Microphone()
                 {
@@ -157,7 +163,7 @@ namespace SoundSimulatorTest
             };
             //var test = Constants.SOS;
             Simulation sim = new Simulation(sourceCollection, microphoneConfiguration);
-            var result = sim.GetIntensityResult(0, 5, 1.0 / 44000, new Vector3(1, 1, 1));
+            var result = ScaleSoundSource(sim.GetIntensityResult(0, 5, 1.0 / 44000, new Vector3(1, 1, 1)));
             //Assert.True(result.All(i => i < 0.0001));
             string identifier = "WavTest_45mic_1source";
             ShowData(result, identifier: identifier);
