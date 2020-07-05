@@ -11,7 +11,7 @@ namespace SoundSimulatorTest
 {
     public class UnitTest1
     {
-        public static void ShowData(IEnumerable<double> result, string identifier="")
+        public static void ShowData(IEnumerable<double> result, string identifier = "")
         {
             var subsample = result.Take(1000);
             var plt = new ScottPlot.Plot(800, 800);
@@ -21,10 +21,10 @@ namespace SoundSimulatorTest
 
         public static void ShowFFTData(IEnumerable<double> result, int samplerate)
         {
-            double[] resultArray = result.Take(512*4).ToArray();
+            double[] resultArray = result.Take(512 * 4).ToArray();
             // Window your signal
             double[] window = FftSharp.Window.Hanning(resultArray.Length);
-            
+
             FftSharp.Window.ApplyInPlace(window, resultArray);
             // For audio we typically want the FFT amplitude (in dB)
             double[] fftPower = FftSharp.Transform.FFTpower(resultArray);
@@ -35,7 +35,7 @@ namespace SoundSimulatorTest
             plt.PlotScatter(freqs, fftPower);
             plt.SaveFig(@$"DataOutput\{DateTime.Now.ToFileTimeUtc()}fft.PNG");
         }
-        public static void WriteWav(IEnumerable<double> result, int rate = 44000, int bitDepth = 16, string identifier="")
+        public static void WriteWav(IEnumerable<double> result, int rate = 44000, int bitDepth = 16, string identifier = "")
         {
             byte[] buffer = result.SelectMany(r => BitConverter.GetBytes(Convert.ToInt16(Math.Max(Math.Min(1, r), -1) * 0.5 * 32768))).ToArray();
 
@@ -74,6 +74,55 @@ namespace SoundSimulatorTest
             Assert.True(result.All(i => i < 0.0001));
         }
 
+        public double GetSignalToNoise(int MicrophoneCount)
+        {
+            Random randoCalrissian = new Random(123456789);
+            float magnitude = 10;
+            MicrophoneConfiguration microphoneConfiguration = new MicrophoneConfiguration()
+            {
+                Microphones = new List<IMicrophone>(Enumerable.Range(0, MicrophoneCount)
+                .Select(i =>
+                new Microphone()
+                {
+                    Position = new Vector3() { X = magnitude * (float)randoCalrissian.NextDouble(), Y = magnitude * (float)randoCalrissian.NextDouble(), Z = magnitude * (float)randoCalrissian.NextDouble() }
+                }))
+            };
+
+            SourceCollection sourceCollection = new SourceCollection()
+            {
+                SoundSources = new List<ISoundSource>()
+                {
+                    new WhiteNoiseSource(new Vector3(0,2,1)),
+                    new SteadySinSource(new Vector3(1,1,0), 1000)
+                }
+            };
+
+            int SampleRate = 44000;
+            Simulation sim = new Simulation(sourceCollection, microphoneConfiguration);
+            var scaledResult = sim.GetIntensityResult(0, 0.1, 1.0 / SampleRate, new Vector3(1, 1, 0)).ScaleSoundSource();
+
+            double[] fftArray = scaledResult.Take(512 * 4).ToArray();
+            // Window your signal
+            double[] window = FftSharp.Window.Hanning(fftArray.Length);
+
+            FftSharp.Window.ApplyInPlace(window, fftArray);
+            // For audio we typically want the FFT amplitude (in dB)
+            double[] fftPower = FftSharp.Transform.FFTpower(fftArray);
+
+            // Create an array of frequencies for each point of the FFT
+            double[] freqs = FftSharp.Transform.FFTfreq(SampleRate, fftPower.Length);
+            var pairs = freqs.Select((e, i) => new { freq = freqs[i], power = fftPower[i] }).ToArray();
+            double backgroundPower = pairs.Where(p => Math.Abs(p.freq - 1000) > 300).Average(p => p.power);
+            return fftPower.Max() - backgroundPower;
+        }
+
+        [Fact]
+        public void TestImprovementScaling()
+        {
+            var results = Enumerable.Range(0, 8).Select(i => new { twoToTheWhat = i, power = GetSignalToNoise((int)Math.Pow(2, i)) }).ToList();
+            Assert.True(results.OrderBy(r => r.twoToTheWhat).SequenceEqual(results.OrderBy(r => r.power)));
+        }
+
         [Fact] 
         public void TestSoundSelection()
         {
@@ -81,7 +130,7 @@ namespace SoundSimulatorTest
             float magnitude = 10;
             MicrophoneConfiguration microphoneConfiguration = new MicrophoneConfiguration()
             {
-                Microphones = new List<IMicrophone>(Enumerable.Range(0, 16)
+                Microphones = new List<IMicrophone>(Enumerable.Range(0,4)
                 .Select(i =>
                 new Microphone()
                 {
@@ -112,9 +161,6 @@ namespace SoundSimulatorTest
             Simulation sim = new Simulation(sourceCollection, microphoneConfiguration);
             var scaledResult = sim.GetIntensityResult(0, 1, 1.0/SampleRate,new Vector3(1,1,0)).ScaleSoundSource();
             
-
-
-
             //Assert.True(result.All(i => i < 0.0001));
             string identifier = "Select1kHz_1mic_1source";
             ShowFFTData(scaledResult, SampleRate);
