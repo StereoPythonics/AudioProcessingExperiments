@@ -20,7 +20,7 @@ namespace SoundSimulator
                 IEnumerable<double> test = MicrophoneConfiguration.PhaseCorrectionsForPoint(listeningTarget)
                     .Select(pc =>
                         SourceCollection.SoundSources
-                        .Select(ss => ss.EvaluateSouceAtTime(currentTime - ((pc.Microphone.Position - ss.Position).Length() / Constants.SOS) - pc.DelayCorrection)).Sum()
+                        .Select(ss => ss.EvaluateSouceAtTime(currentTime - ((pc.Microphone.Position - ss.Position).Length() / Constants.SOS) + pc.DelayCorrection)).Sum()
                     );
                 returnable.Add(test.Average());
             }

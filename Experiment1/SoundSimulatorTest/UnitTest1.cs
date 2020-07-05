@@ -80,7 +80,7 @@ namespace SoundSimulatorTest
             float magnitude = 10;
             MicrophoneConfiguration microphoneConfiguration = new MicrophoneConfiguration()
             {
-                Microphones = new List<IMicrophone>(Enumerable.Range(0, 1)
+                Microphones = new List<IMicrophone>(Enumerable.Range(0, 60)
                 .Select(i =>
                 new Microphone()
                 {
